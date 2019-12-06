@@ -7,8 +7,8 @@ config.read('dwh.cfg')
 
 # DROP TABLES
 
-staging_events_table_drop = "DROP TABLE IF EXISTS events"
-staging_songs_table_drop = "DROP TABLE IF EXISTS songs"
+staging_events_table_drop = "DROP TABLE IF EXISTS staging_events"
+staging_songs_table_drop = "DROP TABLE IF EXISTS staging_songs"
 songplay_table_drop = "DROP TABLE IF EXISTS songplays"
 user_table_drop = "DROP TABLE IF EXISTS users"
 song_table_drop = "DROP TABLE IF EXISTS songs"
@@ -19,29 +19,107 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 # CREATE TABLES
 
 staging_events_table_create= ("""
+ create table staging_events (
+        artist varchar,
+        auth varchar not null,
+        firstName varchar,
+        gender char (1),
+        itemInSession int not null,
+        lastName varchar,
+        length numeric,
+        level varchar not null,
+        location varchar,
+        method varchar not null,
+        page varchar not null,
+        registration numeric,
+        sessionId int not null,
+        song varchar,
+        status int not null,
+        ts numeric not null,
+        userAgent varchar,
+        userId int
+    )
 """)
 
 staging_songs_table_create = ("""
+create table staging_songs (
+        num_songs int not null,
+        artist_id char (18) not null,
+        artist_latitude varchar,
+        artist_longitude varchar,
+        artist_location varchar,
+        artist_name varchar not null,
+        song_id char (18) not null,
+        title varchar not null,
+        duration numeric not null,
+        year int not null
+    )
 """)
 
 songplay_table_create = ("""
+CREATE TABLE  IF NOT EXISTS songplays(
+    songplay_id int identity(0,1) PRIMARY KEY,
+    start_time VARCHAR(100) NOT NULL,
+    user_id INTEGER NOT NULL,
+    level VARCHAR (50) NOT NULL,
+    song_id VARCHAR(100),
+    artist_id VARCHAR(100),
+    session_id INTEGER NOT NULL,
+    location VARCHAR(50),
+    user_agent VARCHAR(255) NOT NULL
+);
 """)
 
 user_table_create = ("""
-""")
+CREATE TABLE IF NOT EXISTS users(
+    user_id INTEGER  PRIMARY KEY, 
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    gender VARCHAR(1) NOT NULL,
+    level VARCHAR(5) NOT NULL
+);""")
 
 song_table_create = ("""
-""")
+CREATE TABLE IF NOT EXISTS songs (
+    song_id VARCHAR(100) PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    artist_id VARCHAR(100) NOT NULL,
+    year INTEGER NOT NULL,
+    duration NUMERIC NOT NULL
+);""")
 
 artist_table_create = ("""
+CREATE TABLE IF NOT EXISTS artists(
+    artist_id VARCHAR(100) PRIMARY KEY, 
+    name VARCHAR(100) NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    latitude VARCHAR(50) NOT NULL,
+    longitude VARCHAR(50) NOT NULL
+);
 """)
 
 time_table_create = ("""
+CREATE TABLE IF NOT EXISTS time(
+    time_id int identity(0,1) PRIMARY KEY,
+    start_time VARCHAR(100),
+    hour INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    week INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    weekday INTEGER NOT NULL,
+    user_id INTEGER NOT NULL
+);
 """)
 
 # STAGING TABLES
+ARN = config.get("IAM_ROLE", "ARN")
+LOG_DATA= config.get("S3","LOG_DATA")
+LOG_JSONPATH = config.get("S3", "LOG_JSONPATH")
 
 staging_events_copy = ("""
+COPY staging_event FROM {}
+IAM_ROLE ''{}' FORMAT AS json {} 
 """).format()
 
 staging_songs_copy = ("""
