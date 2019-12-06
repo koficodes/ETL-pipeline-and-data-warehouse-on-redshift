@@ -132,8 +132,14 @@ IAM_ROLE '{}' FORAMAT JSON 'auto'
 
 songplay_table_insert = ("""
  insert into songplays (
-        start_time, user_id, level, song_id, artist_id,
-        session_id, location, user_agent
+        start_time,
+        user_id,
+        level,
+        song_id,
+        artist_id,
+        session_id, 
+        location, 
+        user_agent
     )
     select
         timestamp 'epoch' + e.ts / 1000 * interval '1 second' as start_time,
@@ -156,8 +162,16 @@ INSERT INTO users (
     last_name,
     gender,
     level
-) SELECT e.userId, e.firstName, e.lastName, e.gender, e.level FROM staging_events e 
-ON CONFLICT (user_id) DO NOTHING
+) SELECT DISTINCT 
+    e.userId,
+    e.firstName,
+    e.lastName,
+    e.gender,
+    e.level
+    FROM staging_events e
+    WHERE e.page ='NextSong'
+
+
 """)
 
 song_table_insert = ("""
@@ -166,9 +180,31 @@ SELECT s.song_id,s.title,s.artist_id, s.year, s.duration from staging_songs
 """)
 
 artist_table_insert = ("""
+INSERT INTO artists (artist_id, name,location, latitude, longitude)
+SELECT DISTINCT artist_id, 
+        artist_name as name,
+        artist_location as location,
+        artist_latitude as latitude,
+        artist_longitude as longitude
+from staging_songs
 """)
 
 time_table_insert = ("""
+    INSERT INTO times
+    SELECT
+        t.start_time,
+        extract(hour from t.start_time) as hour,
+        extract(day from t.start_time) as day,
+        extract(week from t.start_time) as week,
+        extract(month from t.start_time) as month,
+        extract(year from t.start_time) as year,
+        extract(weekday from t.start_time) as weekday
+    FROM (
+        SELECT DISTINCT
+            timestamp 'epoch' + ts / 1000 * interval '1 second' as start_time
+        FROM staging_events
+        WHERE page = 'NextSong'
+    ) t
 """)
 
 # QUERY LISTS
