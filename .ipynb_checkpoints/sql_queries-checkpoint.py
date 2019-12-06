@@ -126,17 +126,43 @@ IAM_ROLE '{}' FORMAT AS json {}
 staging_songs_copy = ("""
 COPY staging_songs FROM {}
 IAM_ROLE '{}' FORAMAT JSON 'auto'
-""").format(sSONG_DATA, ARN)
+""").format(SONG_DATA, ARN)
 
 # FINAL TABLES
 
 songplay_table_insert = ("""
+ insert into songplays (
+        start_time, user_id, level, song_id, artist_id,
+        session_id, location, user_agent
+    )
+    select
+        timestamp 'epoch' + e.ts / 1000 * interval '1 second' as start_time,
+        e.userId as user_id,
+        e.level,
+        s.song_id,
+        s.artist_id,
+        e.sessionId as session_id,
+        e.location,
+        e.userAgent as user_agent
+    from events_staging e
+    left join songs_staging s on e.song = s.title and e.artist = s.artist_name
+    where e.page = 'NextSong'
 """)
 
 user_table_insert = ("""
+INSERT INTO users (
+    user_id,
+    first_name,
+    last_name,
+    gender,
+    level
+) SELECT e.userId, e.firstName, e.lastName, e.gender, e.level FROM staging_events e 
+ON CONFLICT (user_id) DO NOTHING
 """)
 
 song_table_insert = ("""
+INSERT INTO songs (song_id,title,artist_id,year,duration)
+SELECT s.song_id,s.title,s.artist_id, s.year, s.duration from staging_songs
 """)
 
 artist_table_insert = ("""
