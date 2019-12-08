@@ -32,7 +32,7 @@ staging_events_table_create= ("""
         method varchar not null,
         page varchar not null,
         registration numeric,
-        sessionId int not null,
+        sessionId int not null SORTKEY DISTKEY,
         song varchar,
         status int not null,
         ts numeric not null,
@@ -44,7 +44,7 @@ staging_events_table_create= ("""
 staging_songs_table_create = ("""
 create table staging_songs (
         num_songs int not null,
-        artist_id char (18) not null,
+        artist_id char (18) not null SORTKEY DISTKEY,
         artist_latitude varchar,
         artist_longitude varchar,
         artist_location varchar,
@@ -58,9 +58,9 @@ create table staging_songs (
 
 songplay_table_create = ("""
 CREATE TABLE  IF NOT EXISTS songplays(
-    songplay_id int identity(0,1) PRIMARY KEY,
+    songplay_id int identity(0,1) PRIMARY KEY SORTKEY,
     start_time VARCHAR(100) NOT NULL,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL DISTKEY,
     level VARCHAR (50) NOT NULL,
     song_id VARCHAR(100),
     artist_id VARCHAR(100),
@@ -72,7 +72,7 @@ CREATE TABLE  IF NOT EXISTS songplays(
 
 user_table_create = ("""
 CREATE TABLE IF NOT EXISTS users(
-    user_id INTEGER  PRIMARY KEY, 
+    user_id INTEGER  PRIMARY KEY SORTKEY, 
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     gender VARCHAR(1) NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS users(
 
 song_table_create = ("""
 CREATE TABLE IF NOT EXISTS songs (
-    song_id VARCHAR(100) PRIMARY KEY,
+    song_id VARCHAR(100) PRIMARY KEY SORTKEY,
     title VARCHAR(100) NOT NULL,
     artist_id VARCHAR(100) NOT NULL,
     year INTEGER NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS songs (
 
 artist_table_create = ("""
 CREATE TABLE IF NOT EXISTS artists(
-    artist_id VARCHAR(100) PRIMARY KEY, 
+    artist_id VARCHAR(100) PRIMARY KEY SORTKEY, 
     name VARCHAR(100) NOT NULL,
     location VARCHAR(50) NOT NULL,
     latitude VARCHAR(50) NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS artists(
 time_table_create = ("""
 CREATE TABLE IF NOT EXISTS time(
     time_id int identity(0,1) PRIMARY KEY,
-    start_time VARCHAR(100),
+    start_time VARCHAR(100) SORTKEY,
     hour INTEGER NOT NULL,
     day INTEGER NOT NULL,
     week INTEGER NOT NULL,
