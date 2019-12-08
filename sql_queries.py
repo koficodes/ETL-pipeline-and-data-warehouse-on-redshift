@@ -13,7 +13,7 @@ songplay_table_drop = "DROP TABLE IF EXISTS songplays"
 user_table_drop = "DROP TABLE IF EXISTS users"
 song_table_drop = "DROP TABLE IF EXISTS songs"
 artist_table_drop = "DROP TABLE IF EXISTS artists"
-time_table_drop = "DROP TABLE IF EXISTS time"
+time_table_drop = "DROP TABLE IF EXISTS times"
 
 
 # CREATE TABLES
@@ -82,24 +82,24 @@ CREATE TABLE IF NOT EXISTS users(
 song_table_create = ("""
 CREATE TABLE IF NOT EXISTS songs (
     song_id VARCHAR(100) PRIMARY KEY SORTKEY,
-    title VARCHAR(100) NOT NULL,
-    artist_id VARCHAR(100) NOT NULL,
+    title VARCHAR NOT NULL,
+    artist_id VARCHAR NOT NULL,
     year INTEGER NOT NULL,
     duration NUMERIC NOT NULL
 );""")
 
 artist_table_create = ("""
 CREATE TABLE IF NOT EXISTS artists(
-    artist_id VARCHAR(100) PRIMARY KEY SORTKEY, 
-    name VARCHAR(100) NOT NULL,
-    location VARCHAR(50) NOT NULL,
-    latitude VARCHAR(50) NOT NULL,
-    longitude VARCHAR(50) NOT NULL
+    artist_id VARCHAR PRIMARY KEY SORTKEY, 
+    name VARCHAR NULL,
+    location VARCHAR NULL,
+    latitude VARCHAR NULL,
+    longitude VARCHAR NULL
 );
 """)
 
 time_table_create = ("""
-CREATE TABLE IF NOT EXISTS time(
+CREATE TABLE IF NOT EXISTS times(
     time_id int identity(0,1) PRIMARY KEY,
     start_time VARCHAR(100) SORTKEY,
     hour INTEGER NOT NULL,
@@ -107,8 +107,7 @@ CREATE TABLE IF NOT EXISTS time(
     week INTEGER NOT NULL,
     month INTEGER NOT NULL,
     year INTEGER NOT NULL,
-    weekday INTEGER NOT NULL,
-    user_id INTEGER NOT NULL
+    weekday INTEGER NOT NULL
 );
 """)
 
@@ -150,8 +149,8 @@ songplay_table_insert = ("""
         e.sessionId as session_id,
         e.location,
         e.userAgent as user_agent
-    from events_staging e
-    left join songs_staging s on e.song = s.title and e.artist = s.artist_name
+    from staging_events e
+    left join staging_songs s on e.song = s.title and e.artist = s.artist_name
     where e.page = 'NextSong'
 """)
 
@@ -176,7 +175,7 @@ INSERT INTO users (
 
 song_table_insert = ("""
 INSERT INTO songs (song_id,title,artist_id,year,duration)
-SELECT s.song_id,s.title,s.artist_id, s.year, s.duration from staging_songs
+SELECT s.song_id,s.title,s.artist_id, s.year, s.duration from staging_songs s
 """)
 
 artist_table_insert = ("""
@@ -190,7 +189,15 @@ from staging_songs
 """)
 
 time_table_insert = ("""
-    INSERT INTO times
+    INSERT INTO times (
+    start_time,
+    hour,
+    day,
+    week,
+    month,
+    year,
+    weekday
+    )
     SELECT
         t.start_time,
         extract(hour from t.start_time) as hour,
