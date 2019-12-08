@@ -119,13 +119,13 @@ LOG_JSONPATH = config.get("S3", "LOG_JSONPATH")
 SONG_DATA = config.get("S3", "SONG_DATA")
 
 staging_events_copy = ("""
-COPY staging_event FROM {}
-IAM_ROLE '{}' FORMAT AS json {} 
+COPY staging_events FROM {}
+IAM_ROLE {} FORMAT AS json {} region 'us-west-2'
 """).format(LOG_DATA, ARN, LOG_JSONPATH)
 
 staging_songs_copy = ("""
 COPY staging_songs FROM {}
-IAM_ROLE '{}' FORAMAT JSON 'auto'
+IAM_ROLE {} FORMAT JSON 'auto' region 'us-west-2'
 """).format(SONG_DATA, ARN)
 
 # FINAL TABLES
